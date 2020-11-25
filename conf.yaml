@@ -1,0 +1,24 @@
+# Put your Bot and Account Information here 
+username: YourUserName
+password: YourePassword
+client_id: ClientIdOfBot
+client_secret: ClientSecretofBot
+# UserAgent should be Unique. 
+user_agent: TopCommentBot by u/LAZDev13"
+
+
+# Settings
+# Delay before replying recommended >5s otherwise Reddit might block your requests. Also looks more realistic the higher the delay.
+delay: 60
+
+# How much the question must match. 0 no match, 100 --> Exact Match
+confidence: 90
+
+# Minimum karma a post must have.
+min-karma-post: 0
+# Minimum karma a comment must have.
+min-karma-comment: 0
+
+
+# Subreddit: Bot is optimized for AskReddit, idk if it works on any other Subreddit.
+subreddit: AskReddit
