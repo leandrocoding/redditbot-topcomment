@@ -2,20 +2,20 @@
 import time
 
 import praw
+import yaml
 from fuzzywuzzy import fuzz
 from tinydb import TinyDB, Query
 
+
 # Setup
+with open("conf.yaml",mode="r") as f:
+    conf = yaml.load(f, Loader=yaml.FullLoader)
 
-with open("/root/redditbot-topcomment/password.txt", "r") as f:
-    password = f.read().rstrip("\n")
-    print("HH"+password + "HH")
-
-reddit = praw.Reddit(client_id="TfdQxE-AgUs_WQ",
-                     client_secret="Z9fXGYi8DNWNquBtL9xlgR7mkxpCWw",
-                     password=password,
-                     user_agent="TopCommentBot by u/LAZDev13",
-                     username="LAZDev13")
+reddit = praw.Reddit(client_id=conf.get("client_id"),
+                     client_secret=conf.get("client_secret"),
+                     password=conf.get("password"),
+                     user_agent=conf.get("user_agent"),
+                     username=conf.get("username"))
 
 db = TinyDB('db.json')
 
@@ -23,31 +23,52 @@ subquery = Query()
 
 
 def findtopcommentforq(question):
-    for localsubmi in reddit.subreddit("askreddit").search(question, sort="top"):
+    for localsubmi in reddit.subreddit(conf.get("subreddit")).search(question, sort="top"):
         if not db.contains(subquery.id == localsubmi.id):
+            if localsubmi.score < conf.get("min-karma-post"):
+                print("Post Karma to low.")
+                continue
 
             prob = fuzz.token_set_ratio(question,localsubmi.title)
             print(f"Probability: {prob}")
-            if prob>85:
+            if prob>conf.get("confidence"):
                 print("Title of copy:")
                 print(localsubmi.title)
 
                 localsubmi.comment_sort = "top" 
                 comm = localsubmi.comments.list()
-                try:
-                    p = 0
-                    if comm[0].stickied:
-                        p=1
-                    print("Top Comment of Copy:")
-                    print(comm[p].body)
-                    return comm[p].body
-                except IndexError:
-                    print("No comment found")
+                for comment in comm:
+                    try:
+                        if comment.distinguished !=None:
+                            print("Mod comment")
+                            continue
+                        if comment.stickied:
+                            print("Sticked comment")
+                            continue
+                        if comment.score < conf.get("min-karma-comment"):
+                            print("Comment Karma to low.")
+                        cbody = comment.body
+                        
+                    except:
+                        continue
+                    
+                    
+                    if "edit" in cbody.lower():
+                        continue
+                    if "gold" in cbody.lower():
+                        
+                        continue
+                    print(cbody + "\n ----------\n")
+                    return cbody
+
+                    
     return "NO GOOD COMMENT FOUND"
         
 
 def main():
-    for subm in reddit.subreddit("askreddit").new():
+   
+    subreddit = reddit.subreddit("AskReddit")
+    for subm in subreddit.stream.submissions():
         if not db.contains(subquery.id == subm.id):
             db.insert({"id" :subm.id})
             newsubinask(subm)
@@ -63,7 +84,9 @@ def newsubinask(sub):
 
     retcomment = findtopcommentforq(quest)
     if retcomment!="NO GOOD COMMENT FOUND":
-        time.sleep(10)
+        time.sleep(conf.get("delay"))
+
+        
         sub.reply(retcomment)
     else:
         print("NO GOOD COMMENT FOUND")
