@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import time
 
 import praw
@@ -6,8 +7,9 @@ from tinydb import TinyDB, Query
 
 # Setup
 
-with open("password.txt", "r") as f:
-    password = f.read()
+with open("/root/redditbot-topcomment/password.txt", "r") as f:
+    password = f.read().rstrip("\n")
+    print("HH"+password + "HH")
 
 reddit = praw.Reddit(client_id="TfdQxE-AgUs_WQ",
                      client_secret="Z9fXGYi8DNWNquBtL9xlgR7mkxpCWw",
