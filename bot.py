@@ -71,7 +71,8 @@ def findtopcommentforq(question):
 def main():
    
     subreddit = reddit.subreddit("AskReddit")
-    for subm in subreddit.stream.submissions():
+    for subm in subreddit.new():
+    # for subm in subreddit.stream.submissions():
         if not db.contains(subquery.id == subm.id):
             db.insert({"id" :subm.id})
             newsubinask(subm)
