@@ -28,7 +28,7 @@ def findtopcommentforq(question):
             if localsubmi.score < conf.get("min-karma-post"):
                 print("Post Karma to low.")
                 continue
-
+            time.sleep(1)
             prob = fuzz.token_set_ratio(question,localsubmi.title)
             print(f"Probability: {prob}")
             if prob>conf.get("confidence"):
@@ -38,6 +38,7 @@ def findtopcommentforq(question):
                 localsubmi.comment_sort = "top" 
                 comm = localsubmi.comments.list()
                 for comment in comm:
+        
                     try:
                         if comment.distinguished !=None:
                             print("Mod comment")
@@ -48,16 +49,18 @@ def findtopcommentforq(question):
                         if comment.score < conf.get("min-karma-comment"):
                             print("Comment Karma to low.")
                         cbody = comment.body
+                        if "gelöscht" in cbody:
+                            continue
                         
                     except:
                         continue
                     
                     
-                    if "edit" in cbody.lower():
-                        continue
-                    if "gold" in cbody.lower():
+                    # if "edit" in cbody.lower() :
+                    #     continue
+                    # if "gold" in cbody.lower():
                         
-                        continue
+                    #     continue
                     print(cbody + "\n ----------\n")
                     return cbody
 
